@@ -71,13 +71,13 @@
 
     <script>
         // ============================================================
-        // تنظیمات - این پنج خط رو حتماً با اطلاعات روترت عوض کن
+        // تنظیمات - این پنج خط رو با اطلاعات روترت عوض کن
         // ============================================================
-        const ROUTER_IP = "5.233.252.61";        // ← آی‌پی روترت
-        const USERNAME = "userstatus";               // ← نام کاربری روتر
-        const PASSWORD = "Asd@1236";                    // ← پسورد روتر (اگه نداره خالی بذار)
-        const INTERFACE1 = "PPPOE-FTTH";            // ← اسم اینترفیس اینترنت اول
-        const INTERFACE2 = "pppoe-SSJ";            // ← اسم اینترفیس اینترنت دوم
+        const ROUTER_IP = "5.233.252.61";
+        const USERNAME = "userstatus";
+        const PASSWORD = "Asd@1236";
+        const INTERFACE1 = "PPPOE-FTTH";
+        const INTERFACE2 = "pppoe-SSJ";
         // ============================================================
 
         // آدرس Proxy برای حل مشکل CORS
@@ -96,13 +96,13 @@
                 });
 
                 if (!response.ok) {
-                    throw new Error('خطا د
-
-ر ارتباط با روتر (کد: ' + response.status + ')');
+                    throw new Error('خطا در ارتباط با روتر (کد: ' + response.status + ')');
                 }
 
                 const data = await response.json();
-                const iface = data.find(item => item.name === interfaceName);
+                const iface = data.find(item => item.name ===
+
+interfaceName);
 
                 if (iface && iface.running === true) {
                     return "UP";
