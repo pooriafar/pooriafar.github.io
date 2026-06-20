@@ -42,6 +42,20 @@
         .footer { text-align: center; color: #555; font-size: 12px; margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 20px; }
         .badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; background: rgba(255,255,255,0.05); color: #888; }
         .error-msg { color: #ff6644; text-align: center; padding: 20px; font-size: 14px; }
+        .refresh-btn {
+            background: #00d4ff;
+            color: #0a0a1a;
+            border: none;
+            padding: 10px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+        .refresh-btn:hover {
+            background: #00b8d4;
+        }
     </style>
 </head>
 <body>
@@ -64,90 +78,81 @@
         <div class="footer">
             <div id="time">🕐 در حال بروزرسانی...</div>
             <div style="margin-top: 10px;">
-                <span class="badge">🔄 بروزرسانی خودکار هر ۳ ثانیه</span>
+                <span class="badge">🔄 بروزرسانی خودکار هر ۱۰ ثانیه</span>
             </div>
+            <button class="refresh-btn" onclick="updateStatus()">🔄 بروزرسانی دستی</button>
         </div>
     </div>
 
     <script>
         // ============================================================
-        // تنظیمات - این پنج خط رو با اطلاعات روترت عوض کن
+        // تنظیمات - فقط آی‌پی عمومی روترت رو عوض کن
         // ============================================================
-        const ROUTER_IP = "5.233.252.61";
-        const USERNAME = "userstatus";
-        const PASSWORD = "Asd@1236";
-        const INTERFACE1 = "PPPOE-FTTH";
-        const INTERFACE2 = "pppoe-SSJ";
+        const ROUTER_IP = "5.233.252.61";  // ← آی‌پی عمومی روترت
+        const STATUS_URL = `http://${ROUTER_IP}/status.json`;
         // ============================================================
-
-        // آدرس Proxy برای حل مشکل CORS
-        const PROXY_URL = `https://cors-anywhere.herokuapp.com/http://${ROUTER_IP}`;
 
         let errorCount = 0;
 
-        async function checkInternet(interfaceName) {
+        async function fetchStatus() {
             try {
-                const url = `${PROXY_URL}/rest/interface`;
-                const response = await fetch(url, {
-                    method: 'GET',
-                    headers: {
-                        'Authorization': 'Basic ' + btoa(USERNAME + ':' + PASSWORD)
-                    }
-                });
+                // استفاده از سرویس CORS Proxy
+                const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(STATUS_URL)}`;
+                const response = await fetch(proxyUrl);
 
                 if (!response.ok) {
-                    throw new Error('خطا در ارتباط با روتر (کد: ' + response.status + ')');
+                    throw new Error('خطا در دریافت اط
+
+لاعات');
                 }
 
                 const data = await response.json();
-                const iface = data.find(item => item.name ===
-
-interfaceName);
-
-                if (iface && iface.running === true) {
-                    return "UP";
-                } else {
-                    return "DOWN";
-                }
+                return data;
             } catch (error) {
-                console.log("خطا:", error.message);
+                console.error("خطا:", error.message);
                 errorCount++;
-                return "❌ خطا";
+                return null;
             }
         }
 
         async function updateStatus() {
-            const status1 = await checkInternet(INTERFACE1);
-            const status2 = await checkInternet(INTERFACE2);
+            const data = await fetchStatus();
 
-            const el1 = document.getElementById('status1');
-            el1.textContent = status1;
-            el1.className = 'box-status';
-            if (status1 === "UP") el1.classList.add('up');
-            else if (status1 === "DOWN") el1.classList.add('down');
-            else el1.classList.add('loading');
+            if (data) {
+                // بروزرسانی اینترنت ۱
+                const el1 = document.getElementById('status1');
+                const status1 = data.internet1 === "UP" ? "UP" : "DOWN";
+                el1.textContent = status1;
+                el1.className = 'box-status ' + (status1 === "UP" ? 'up' : 'down');
 
-            const el2 = document.getElementById('status2');
-            el2.textContent = status2;
-            el2.className = 'box-status';
-            if (status2 === "UP") el2.classList.add('up');
-            else if (status2 === "DOWN") el2.classList.add('down');
-            else el2.classList.add('loading');
+                // بروزرسانی اینترنت ۲
+                const el2 = document.getElementById('status2');
+                const status2 = data.internet2 === "UP" ? "UP" : "DOWN";
+                el2.textContent = status2;
+                el2.className = 'box-status ' + (status2 === "UP" ? 'up' : 'down');
 
-            const now = new Date();
-            document.getElementById('time').textContent = '🕐 آخرین بروزرسانی: ' + now.toLocaleTimeString('fa-IR');
+                // بروزرسانی زمان
+                document.getElementById('time').textContent = '🕐 آخرین بروزرسانی: ' + (data.time || new Date().toLocaleTimeString('fa-IR'));
 
-            const errorEl = document.getElementById('errorMsg');
-            if (errorCount > 3) {
-                errorEl.style.display = 'block';
-                errorEl.textContent = '⚠️ اتصال به روتر برقرار نیست. مطمئن شو روتر روشنه و API فعاله.';
+                // پنهان کردن خطا
+                document.getElementById('errorMsg').style.display = 'none';
+                errorCount = 0;
             } else {
-                errorEl.style.display = 'none';
+                // نمایش خطا
+                const errorEl = document.getElementById('errorMsg');
+                errorEl.style.display = 'block';
+                if (errorCount > 3) {
+                    errorEl.textContent = '⚠️ اتصال به روتر برقرار نیست. مطمئن شو روتر روشنه و فایل status.json وجود داره.';
+                } else {
+                    errorEl.textContent = '⏳ در حال تلاش برای اتصال به روتر...';
+                }
             }
         }
 
+        // اجرای اولیه
         updateStatus();
-        setInterval(updateStatus, 3000);
+        // بروزرسانی هر ۱۰ ثانیه
+        setInterval(updateStatus, 10000);
     </script>
 </body>
 </html>
