@@ -1,0 +1,39 @@
+em.name === interfaceName);
+                if (iface && iface.running) {
+                    return "UP";
+                } else {
+                    return "DOWN";
+                }
+            } catch (error) {
+                console.log("خطا در ارتباط با روتر:", error);
+                return "❓ خطا";
+            }
+        }
+
+        // تابع برای بروزرسانی صفحه
+        async function updateStatus() {
+            // برای اینترنت اول - اسم اینترفیس رو بذار (مثلاً ether1 یا pppoe-out1)
+            const status1 = await checkInternet("ether1");  // ← اسم اینترفیس اول
+            const status2 = await checkInternet("ether2");  // ← اسم اینترفیس دوم
+
+            // بروزرسانی اینترنت ۱
+            const box1 = document.querySelector('#status1 .box-status');
+            box1.textContent = status1;
+            box1.className = 'box-status ' + (status1 === "UP" ? 'up' : 'down');
+
+            // بروزرسانی اینترنت ۲
+            const box2 = document.querySelector('#status2 .box-status');
+            box2.textContent = status2;
+            box2.className = 'box-status ' + (status2 === "UP" ? 'up' : 'down');
+
+            // بروزرسانی زمان
+            document.getElementById('time').textContent = '🕐 آخرین بروزرسانی: ' + new Date().toLocaleTimeString('fa-IR');
+        }
+
+        // اجرا شدن اولیه
+        updateStatus();
+        // بروزرسانی هر ۳ ثانیه
+        setInterval(updateStatus, 3000);
+    </script>
+</body>
+</html>
