@@ -5,11 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>وضعیت اینترنت</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Segoe UI', Tahoma, sans-serif;
             background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
@@ -20,77 +16,32 @@
             padding: 20px;
         }
         .container {
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(255,255,255,0.05);
             backdrop-filter: blur(20px);
             border-radius: 30px;
             padding: 40px;
             max-width: 500px;
             width: 100%;
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.1);
         }
-        h1 {
-            text-align: center;
-            color: #00d4ff;
-            font-size: 28px;
-            margin-bottom: 10px;
-        }
-        .subtitle {
-            text-align: center;
-            color: #888;
-            font-size: 14px;
-            margin-bottom: 30px;
-        }
+        h1 { text-align: center; color: #00d4ff; font-size: 28px; margin-bottom: 10px; }
+        .subtitle { text-align: center; color: #888; font-size: 14px; margin-bottom: 30px; }
         .box {
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(255,255,255,0.05);
             border-radius: 20px;
             padding: 25px;
             margin-bottom: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            transition: all 0.3s ease;
+            border: 1px solid rgba(255,255,255,0.08);
         }
-        .box-title {
-            font-size: 18px;
-            color: #ccc;
-            margin-bottom: 10px;
-        }
-        .box-status {
-            font-size: 42px;
-            font-weight: bold;
-            text-align: center;
-            padding: 10px 0;
-        }
-        .up {
-            color: #00ff88;
-        }
-        .down {
-            color: #ff4444;
-        }
-        .loading {
-            color: #ffaa00;
-        }
-        .footer {
-            text-align: center;
-            color: #555;
-            font-size: 12px;
-            margin-top: 20px;
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
-            padding-top: 20px;
-        }
-        .badge {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            background: rgba(255, 255, 255, 0.05);
-            color: #888;
-        }
-        .error-msg {
-            color: #ff6644;
-            text-align: center;
-            padding: 20px;
-            font-size: 14px;
-        }
+        .box-title { font-size: 18px; color: #ccc; margin-bottom: 10px; }
+        .box-status { font-size: 42px; font-weight: bold; text-align: center; padding: 10px 0; }
+        .up { color: #00ff88; }
+        .down { color: #ff4444; }
+        .loading { color: #ffaa00; }
+        .footer { text-align: center; color: #555; font-size: 12px; margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 20px; }
+        .badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; background: rgba(255,255,255,0.05); color: #888; }
+        .error-msg { color: #ff6644; text-align: center; padding: 20px; font-size: 14px; }
     </style>
 </head>
 <body>
@@ -120,22 +71,23 @@
 
     <script>
         // ============================================================
-        // تنظیمات - این سه خط رو حتماً با اطلاعات روترت عوض کن
+        // تنظیمات - این پنج خط رو حتماً با اطلاعات روترت عوض کن
         // ============================================================
-        const ROUTER_IP = "5.233.252.61";     // ← آی‌پی روترت رو بذار
-        const USERNAME = "pouriafar";            // ← نام کاربری روتر
-        const PASSWORD = "Mosi.2395";           // ← پسورد روترت رو بذار
-        const INTERFACE1 = "PPPOE-FTTH";         // ← اسم اینترفیس اینترنت اول
-        const INTERFACE2 = "pppoe-SSJ";         // ← اسم اینترفیس اینترنت دوم
+        const ROUTER_IP = "5.233.252.61";        // ← آی‌پی روترت
+        const USERNAME = "pouriafar";               // ← نام کاربری روتر
+        const PASSWORD = "Mosi.2395";                    // ← پسورد روتر (اگه نداره خالی بذار)
+        const INTERFACE1 = "PPPOE-FTTH";            // ← اسم اینترفیس اینترنت اول
+        const INTERFACE2 = "pppoe-SSJ";            // ← اسم اینترفیس اینترنت دوم
         // ============================================================
+
+        // آدرس Proxy برای حل مشکل CORS
+        const PROXY_URL = `https://cors-anywhere.herokuapp.com/http://${5.233.252.61}`;
 
         let errorCount = 0;
 
-        a
-
-sync function checkInternet(interfaceName) {
+        async function checkInternet(interfaceName) {
             try {
-                const url = `http://${ROUTER_IP}/rest/interface`;
+                const url = `${PROXY_URL}/rest/interface`;
                 const response = await fetch(url, {
                     method: 'GET',
                     headers: {
@@ -144,13 +96,14 @@ sync function checkInternet(interfaceName) {
                 });
 
                 if (!response.ok) {
-                    throw new Error('خطا در ارتباط با روتر (کد: ' + response.status + ')');
+                    throw new Error('خطا د
+
+ر ارتباط با روتر (کد: ' + response.status + ')');
                 }
 
                 const data = await response.json();
-
-                // پیدا کردن اینترفیس مورد نظر
                 const iface = data.find(item => item.name === interfaceName);
+
                 if (iface && iface.running === true) {
                     return "UP";
                 } else {
@@ -167,7 +120,6 @@ sync function checkInternet(interfaceName) {
             const status1 = await checkInternet(INTERFACE1);
             const status2 = await checkInternet(INTERFACE2);
 
-            // بروزرسانی اینترنت ۱
             const el1 = document.getElementById('status1');
             el1.textContent = status1;
             el1.className = 'box-status';
@@ -175,7 +127,6 @@ sync function checkInternet(interfaceName) {
             else if (status1 === "DOWN") el1.classList.add('down');
             else el1.classList.add('loading');
 
-            // بروزرسانی اینترنت ۲
             const el2 = document.getElementById('status2');
             el2.textContent = status2;
             el2.className = 'box-status';
@@ -183,11 +134,9 @@ sync function checkInternet(interfaceName) {
             else if (status2 === "DOWN") el2.classList.add('down');
             else el2.classList.add('loading');
 
-            // بروزرسانی زمان
             const now = new Date();
             document.getElementById('time').textContent = '🕐 آخرین بروزرسانی: ' + now.toLocaleTimeString('fa-IR');
 
-            // نمایش خطا
             const errorEl = document.getElementById('errorMsg');
             if (errorCount > 3) {
                 errorEl.style.display = 'block';
@@ -197,9 +146,7 @@ sync function checkInternet(interfaceName) {
             }
         }
 
-        // اجرای اولیه
         updateStatus();
-        // بروزرسانی هر ۳ ثانیه
         setInterval(updateStatus, 3000);
     </script>
 </body>
